@@ -18,7 +18,7 @@ body {
   align-items: center;
 }
 
-.news-list-wrapper {
+.news-list-wrapper, .chart-wrapper {
   border-bottom: 4px solid var(--header-background);
 }
 

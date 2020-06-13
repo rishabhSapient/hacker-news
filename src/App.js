@@ -27,9 +27,16 @@ class App extends React.Component {
       .then((res) => {
         let result = res.data.hits;
         let hideNewsList = localStorage.getItem('hideNewsList');
+        let localUpvoteCount = localStorage.getItem('updatedUpvoteCount');
         if (hideNewsList) {
           hideNewsList = JSON.parse(hideNewsList);
           result = result.filter(val => hideNewsList.indexOf(val.objectID) === -1);
+        }
+        if(localUpvoteCount){
+          let upvoteCount = JSON.parse(localUpvoteCount);
+          result.forEach((val) => {
+            val.points = upvoteCount[val.objectID] || val.points;
+          })
         }
 
         this.modifyDataForLineChart(result);
@@ -94,6 +101,23 @@ class App extends React.Component {
     });
   }
 
+  upvoteItem(data){
+    const objectId = data.newsData.objectID;
+    const newsArr = [...this.state.newsList];
+    let localUpvoteCount = localStorage.getItem('updatedUpvoteCount');
+    let updatedUpvoteCount = localUpvoteCount ? JSON.parse(localUpvoteCount) : {};
+    newsArr.forEach((val) => {
+      if(val.objectID === objectId){
+        val.points = data.upvoteCount;
+        updatedUpvoteCount[objectId] = data.upvoteCount;
+      }
+    });
+    localStorage.setItem('updatedUpvoteCount', JSON.stringify(updatedUpvoteCount));
+    this.setState({
+      newsList : newsArr
+    })
+  }
+
   render() {
     const { newsList, loading, pageNo } = this.state;
     return (
@@ -113,6 +137,7 @@ class App extends React.Component {
                 <NewsItem
                   key={val.created_at_i}
                   hideItem={$event => this.hideItem($event)}
+                  upvoteItem={$event => this.upvoteItem($event)}
                   newsData={val}
                 />
               ))}
@@ -130,7 +155,9 @@ class App extends React.Component {
             }
           </div>
         </section>
-        <LineChart config={this.modifyDataForLineChart(newsList)} />
+        <section className="chart-wrapper">
+          <LineChart config={this.modifyDataForLineChart(newsList)} />
+        </section>
       </div>
     );
   }

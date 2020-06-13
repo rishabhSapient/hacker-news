@@ -12,7 +12,7 @@ export default class NewsItem extends React.Component {
   }
 
   componentDidMount() {
-    const { newsData } = this.props; 
+    const { newsData } = this.props;
     this.setState({
       newsData,
       upvoteCount: newsData.points,
@@ -64,6 +64,8 @@ export default class NewsItem extends React.Component {
     const newUpvote = upvoteCount + 1;
     this.setState({
       upvoteCount: newUpvote,
+    }, () => {
+      this.props.upvoteItem(this.state);
     });
   }
 
